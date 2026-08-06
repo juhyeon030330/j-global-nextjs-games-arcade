@@ -77,40 +77,6 @@ export function Sidebar({ lang, nickname, onLogout }: SidebarProps) {
 
         <div className="pt-4 mt-4 border-t border-slate-100">
           <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-            {lang === "ja" ? "コミュニティ" : "COMMUNITY"}
-          </p>
-        </div>
-
-        <Link
-          href="/discussion"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-            isActive("/discussion")
-              ? "bg-slate-100 text-[#1f497c] font-bold"
-              : "text-slate-600 hover:text-[#1f497c] hover:bg-slate-100"
-          }`}
-        >
-          <div className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500 shrink-0">
-            <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
-              <g className="flower-petal">
-                <circle cx="50" cy="22" r="16" />
-                <circle cx="50" cy="78" r="16" />
-                <circle cx="22" cy="50" r="16" />
-                <circle cx="78" cy="50" r="16" />
-                <circle cx="30" cy="30" r="16" />
-                <circle cx="70" cy="30" r="16" />
-                <circle cx="30" cy="70" r="16" />
-                <circle cx="70" cy="70" r="16" />
-              </g>
-              <circle className="flower-core" cx="50" cy="50" r="16" />
-            </svg>
-          </div>
-          <span className="text-sm tracking-tight">
-            {lang === "ja" ? "掲示板" : "Discussion Board"}
-          </span>
-        </Link>
-
-        <div className="pt-4 mt-4 border-t border-slate-100">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
             {lang === "ja" ? "管理者" : "ADMIN"}
           </p>
         </div>

@@ -75,7 +75,7 @@ export function ArcadeRow({ title, games, lang }: ArcadeRowProps) {
         {games.map((game) => (
           <Link
             key={game.slug}
-            href={`/click/${game.slug}`}
+            href={`/games/${game.slug}`}
             onClick={handleCardClick}
             className="card flex-none w-[270px] bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md hover:border-[#1f497c] transition-all group flex flex-col"
           >
