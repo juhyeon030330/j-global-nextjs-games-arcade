@@ -1,69 +1,100 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { ChevronRight } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { Sidebar } from "@/components/Sidebar";
+import { Header } from "@/components/Header";
+import { ArcadeRow, Game } from "@/components/ArcadeRow";
+
+export default function HomePage() {
+  const [games, setGames] = useState<Game[]>([]);
+  const [lang, setLang] = useState<"ja" | "en">("ja");
+  const [nickname, setNickname] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    async function fetchGames() {
+      const { data } = await supabase.from("games").select("*");
+      if (data) setGames(data);
+    }
+    fetchGames();
+
+    // Load persisted nickname or language if available
+    const savedLang = localStorage.getItem("lang") as "ja" | "en";
+    if (savedLang) setLang(savedLang);
+
+    const savedNickname = localStorage.getItem("nickname");
+    if (savedNickname) setNickname(savedNickname);
+  }, []);
+
+  const toggleLang = () => {
+    const nextLang = lang === "ja" ? "en" : "ja";
+    setLang(nextLang);
+    localStorage.setItem("lang", nextLang);
+  };
+
+  const handleLogout = () => {
+    setNickname(undefined);
+    localStorage.removeItem("nickname");
+  };
+
+  const popularGames = [...games].sort(
+    (a, b) => (b.clicks || 0) - (a.clicks || 0),
+  );
+  const alphabeticalGames = [...games].sort((a, b) =>
+    (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()),
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <Sidebar lang={lang} nickname={nickname} onLogout={handleLogout} />
+
+      <div className="flex-1 ml-0 md:ml-64 flex flex-col min-w-0 pb-20 md:pb-0 bg-gradient-to-b from-slate-50 to-white">
+        <Header
+          lang={lang}
+          toggleLang={toggleLang}
+          nickname={nickname}
+          breadcrumbs={
+            <>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md font-bold">
+                {lang === "ja" ? "ゲーセン" : "Arcade"}
+              </span>
+            </>
+          }
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        <main className="p-4 md:p-8 max-w-7xl w-full mx-auto flex-1 focus:outline-none">
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
+              {lang === "ja"
+                ? "J-Global ゲームセンター"
+                : "Japanese Game Arcade"}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {lang === "ja"
+                ? "以下のゲームを選択して日本語を練習し、アーケードスコアを獲得しましょう！"
+                : "Select a game below to practice Japanese and build your arcade score!"}
+            </p>
+          </div>
+
+          <ArcadeRow
+            title={lang === "ja" ? "注目のゲーム" : "Featured Games"}
+            games={games}
+            lang={lang}
+          />
+          <ArcadeRow
+            title={lang === "ja" ? "人気のゲーム" : "Popular Choices"}
+            games={popularGames}
+            lang={lang}
+          />
+          <ArcadeRow
+            title={lang === "ja" ? "すべてのゲーム (A-Z)" : "All Games (A-Z)"}
+            games={alphabeticalGames}
+            lang={lang}
+          />
+        </main>
+      </div>
     </div>
   );
 }

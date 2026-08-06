@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.flower-petal {
+  fill: #ff758c;
+}
+.flower-core {
+  fill: #ffde6a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Arcade Row / Carousel utilities */
+.netflix-row {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  scroll-behavior: smooth;
+  cursor: grab;
+  user-select: none;
+}
+.netflix-row:active {
+  cursor: grabbing;
+}
+.netflix-row::-webkit-scrollbar {
+  height: 8px;
+}
+.netflix-row::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+.netflix-row::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.netflix-row::-webkit-scrollbar-thumb:hover {
+  background: #1f497c;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.live-preview {
+  width: 1080px;
+  height: 580px;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0.25);
+  transform-origin: top left;
+  pointer-events: none;
 }
