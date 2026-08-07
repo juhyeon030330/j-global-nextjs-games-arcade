@@ -20,6 +20,15 @@ export function Sidebar({ lang, nickname, onLogout }: SidebarProps) {
     return false;
   };
 
+  const handleLogoutClick = () => {
+    // 1. Clear persistent storage across all pages
+    localStorage.removeItem("nickname");
+    localStorage.removeItem("house");
+
+    // 2. Trigger local state reset on current page
+    onLogout();
+  };
+
   return (
     <aside className="hidden md:flex w-64 bg-white text-slate-600 flex-col fixed inset-y-0 border-r border-slate-200/80 shadow-sm z-30">
       <div className="h-24 flex items-center justify-center px-6 border-b border-slate-100">
@@ -101,7 +110,7 @@ export function Sidebar({ lang, nickname, onLogout }: SidebarProps) {
       {nickname && (
         <div className="p-4 border-t border-slate-100 bg-slate-50/60 backdrop-blur-sm">
           <button
-            onClick={onLogout}
+            onClick={handleLogoutClick}
             className="w-full flex items-center gap-2 text-sm text-red-600 font-semibold px-3 py-2 rounded-xl hover:bg-red-50 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />

@@ -10,11 +10,14 @@ import {
   Edit2,
   Check,
   X,
+  UserPlus,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import Link from "next/link";
+
+const HOUSES = ["A", "B", "C", "D"];
 
 interface Game {
   slug: string;
@@ -40,6 +43,7 @@ export default function GameDetailPage({
   const { slug } = use(params);
   const [lang, setLang] = useState<"ja" | "en">("ja");
   const [nickname, setNickname] = useState("");
+  const [claimInput, setClaimInput] = useState("");
   const [game, setGame] = useState<Game | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -76,6 +80,42 @@ export default function GameDetailPage({
     if (commentData) setComments(commentData);
   }
 
+  const handleClaimNickname = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = claimInput.trim();
+    if (!trimmed) return;
+
+    // Save locally
+    localStorage.setItem("nickname", trimmed);
+    let userHouse = localStorage.getItem("house");
+
+    // Ensure house assignment & leaderboard entry
+    const { data: lbUser } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("nickname", trimmed)
+      .single();
+
+    if (lbUser?.house) {
+      userHouse = lbUser.house;
+      localStorage.setItem("house", lbUser.house);
+    } else if (!userHouse) {
+      userHouse = HOUSES[Math.floor(Math.random() * HOUSES.length)];
+      localStorage.setItem("house", userHouse);
+    }
+
+    if (!lbUser) {
+      await supabase.from("leaderboard").insert({
+        nickname: trimmed,
+        score: 0,
+        house: userHouse,
+      });
+    }
+
+    setNickname(trimmed);
+    setClaimInput("");
+  };
+
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname || !newComment.trim()) return;
@@ -102,7 +142,7 @@ export default function GameDetailPage({
       .from("game_comments")
       .update({ comment: editCommentText.trim() })
       .eq("id", commentId)
-      .eq("user_nickname", nickname); // Ensure ownership
+      .eq("user_nickname", nickname);
 
     setEditingCommentId(null);
     setEditCommentText("");
@@ -121,7 +161,7 @@ export default function GameDetailPage({
       .from("game_comments")
       .delete()
       .eq("id", commentId)
-      .eq("user_nickname", nickname); // Ensure ownership
+      .eq("user_nickname", nickname);
 
     fetchGameAndComments();
   };
@@ -245,11 +285,45 @@ export default function GameDetailPage({
                 </div>
               </form>
             ) : (
-              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-4 text-center text-xs text-slate-500 mb-8">
-                {lang === "ja"
-                  ? "コメントを投稿するには、ハウスカップページ等でニックネームを登録してください。"
-                  : "Claim a nickname on the Leaderboard page to join the discussion."}
-              </div>
+              <form
+                onSubmit={handleClaimNickname}
+                className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 md:p-5 mb-8"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                  <UserPlus className="w-4 h-4 text-[#1f497c]" />
+                  <span>
+                    {lang === "ja"
+                      ? "ニックネームを登録して会話に参加しよう"
+                      : "Claim a nickname to post comments"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  {lang === "ja"
+                    ? "コメントやスコア記録に使用するニックネームを入力してください。"
+                    : "Enter a handle below to identify yourself across comments and leaderboards."}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={claimInput}
+                    onChange={(e) => setClaimInput(e.target.value)}
+                    placeholder={
+                      lang === "ja" ? "例: ゲーマー123" : "e.g. ArcadeHero"
+                    }
+                    required
+                    className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl text-xs bg-white focus:outline-none focus:border-[#1f497c]"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[#1f497c] hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>
+                      {lang === "ja" ? "ニックネームを決定" : "Claim Name"}
+                    </span>
+                  </button>
+                </div>
+              </form>
             )}
 
             <div className="space-y-4">
