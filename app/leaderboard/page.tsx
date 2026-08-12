@@ -97,6 +97,16 @@ export default function LeaderboardPage() {
 
   const maxScore = Math.max(...Object.values(houseTotals), 1);
 
+  const rankedPlayers = [...players].sort(
+    (a, b) => (b.score || 0) - (a.score || 0),
+  );
+
+  const RANK_BADGE_STYLES: Record<number, string> = {
+    1: "bg-amber-400 text-white",
+    2: "bg-slate-300 text-slate-700",
+    3: "bg-amber-700 text-white",
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       <Sidebar
@@ -221,6 +231,65 @@ export default function LeaderboardPage() {
                 );
               })}
             </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 md:p-10 mt-8">
+            <h2 className="text-center font-bold text-slate-800 text-lg mb-6">
+              {lang === "ja" ? "ランキング" : "Ranking"}
+            </h2>
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                  <th className="py-2 px-2 font-bold w-16">
+                    {lang === "ja" ? "順位" : "Rank"}
+                  </th>
+                  <th className="py-2 px-2 font-bold">
+                    {lang === "ja" ? "プレイヤー" : "Player"}
+                  </th>
+                  <th className="py-2 px-2 font-bold text-right">
+                    {lang === "ja" ? "ポイント" : "Points"}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rankedPlayers.map((p, i) => {
+                  const rank = i + 1;
+                  return (
+                    <tr key={p.nickname}>
+                      <td className="py-3 px-2">
+                        <span
+                          className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                            RANK_BADGE_STYLES[rank] ||
+                            "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          {rank}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-8 h-8 rounded-full border border-slate-200 bg-cover bg-center shrink-0"
+                            style={{
+                              backgroundImage: `url('/static/images/house_${(p.house || "A").toLowerCase()}.webp')`,
+                            }}
+                          />
+                          <span className="font-bold text-slate-800">
+                            {p.nickname}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 text-right font-extrabold text-[#1f497c]">
+                        {p.score || 0}{" "}
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          PTS
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </main>
       </div>
