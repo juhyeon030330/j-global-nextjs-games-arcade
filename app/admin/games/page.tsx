@@ -10,6 +10,7 @@ import {
   Trash2,
   ChevronRight,
   Edit,
+  Download,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Sidebar } from "@/components/Sidebar";
@@ -24,6 +25,7 @@ interface Game {
   description_ja?: string;
   code?: string;
   clicks: number;
+  target_url?: string;
 }
 
 export default function AdminGamesPage() {
@@ -231,6 +233,31 @@ export default function AdminGamesPage() {
       type: "success",
     });
     fetchGames();
+  };
+
+  const handleDownload = async (game: Game) => {
+    if (!game.target_url) {
+      setMsg({ text: "No HTML file found for this game.", type: "error" });
+      return;
+    }
+    try {
+      const res = await fetch(game.target_url);
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${game.slug}.html`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setMsg({
+        text: err.message || "Failed to download HTML file.",
+        type: "error",
+      });
+    }
   };
 
   const handleDelete = async (slug: string, name: string) => {
@@ -523,9 +550,15 @@ export default function AdminGamesPage() {
                             {game.clicks}
                           </td>
                           <td
-                            className="py-3 px-4 text-right"
+                            className="py-3 px-4 text-right whitespace-nowrap"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            <button
+                              onClick={() => handleDownload(game)}
+                              className="text-xs text-[#1f497c] hover:text-slate-800 font-semibold border border-slate-200 hover:bg-sky-50 px-2.5 py-1 rounded-md transition-colors mr-2"
+                            >
+                              {lang === "ja" ? "ダウンロード" : "Download"}
+                            </button>
                             <button
                               onClick={() => handleDelete(game.slug, game.name)}
                               className="text-xs text-red-500 hover:text-red-700 font-semibold border border-red-200 hover:bg-red-50 px-2.5 py-1 rounded-md transition-colors"
@@ -640,16 +673,36 @@ export default function AdminGamesPage() {
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Replace HTML File (Optional)
-                    </label>
-                    <input
-                      type="file"
-                      accept=".html"
-                      onChange={(e) => setEditFile(e.target.files?.[0] || null)}
-                      className="w-full text-xs text-slate-500"
-                    />
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-700">
+                        {lang === "ja"
+                          ? "現在のHTMLファイル"
+                          : "Current HTML File"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDownload(editingGame)}
+                        disabled={!editingGame.target_url}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-[#1f497c] hover:text-slate-800 border border-slate-200 hover:bg-sky-50 px-2.5 py-1 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        {lang === "ja" ? "ダウンロード" : "Download"}
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Replace HTML File (Optional)
+                      </label>
+                      <input
+                        type="file"
+                        accept=".html"
+                        onChange={(e) =>
+                          setEditFile(e.target.files?.[0] || null)
+                        }
+                        className="w-full text-xs text-slate-500"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex justify-end gap-2 pt-2">
