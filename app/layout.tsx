@@ -1,4 +1,5 @@
 import "./globals.css";
+import { StarClickEffect } from "@/components/StarClickEffect";
 
 export const metadata = {
   title: "J-Global Game Arcade",
@@ -13,6 +14,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-sky-100">
+        <StarClickEffect />
         {children}
       </body>
     </html>
