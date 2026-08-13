@@ -1,7 +1,13 @@
 "use client";
 
-import { useRef, MouseEvent } from "react";
+import { useEffect, useRef, useState, MouseEvent } from "react";
 import Link from "next/link";
+import { Heart } from "lucide-react";
+import {
+  getSavedGames,
+  toggleSavedGame,
+  SAVED_GAMES_EVENT,
+} from "@/lib/savedGames";
 
 export interface Game {
   slug: string;
@@ -17,14 +23,29 @@ interface ArcadeRowProps {
   title: string;
   games: Game[];
   lang: "ja" | "en";
+  nickname?: string;
 }
 
-export function ArcadeRow({ title, games, lang }: ArcadeRowProps) {
+export function ArcadeRow({ title, games, lang, nickname }: ArcadeRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const isDown = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const hasDragged = useRef(false);
+  const [savedSlugs, setSavedSlugs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const refresh = () => setSavedSlugs(getSavedGames());
+    refresh();
+    window.addEventListener(SAVED_GAMES_EVENT, refresh);
+    return () => window.removeEventListener(SAVED_GAMES_EVENT, refresh);
+  }, []);
+
+  const handleToggleSave = (e: MouseEvent, slug: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSavedSlugs(toggleSavedGame(slug));
+  };
 
   if (!games || games.length === 0) return null;
 
@@ -86,6 +107,23 @@ export function ArcadeRow({ title, games, lang }: ArcadeRowProps) {
                 className="live-preview"
                 loading="lazy"
               />
+              {nickname && (
+                <button
+                  onClick={(e) => handleToggleSave(e, game.slug)}
+                  className="absolute top-2 right-2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-sm cursor-pointer transition-colors"
+                  aria-label={
+                    savedSlugs.includes(game.slug) ? "Unsave" : "Save"
+                  }
+                >
+                  <Heart
+                    className={`w-3.5 h-3.5 transition-colors ${
+                      savedSlugs.includes(game.slug)
+                        ? "fill-rose-500 text-rose-500"
+                        : "text-slate-400"
+                    }`}
+                  />
+                </button>
+              )}
             </div>
             <div className="p-4 flex flex-col flex-1">
               <h3 className="font-bold text-slate-900 group-hover:text-[#1f497c] transition-colors mb-1 text-base line-clamp-1">

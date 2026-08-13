@@ -82,16 +82,19 @@ export default function HomePage() {
             title={lang === "ja" ? "注目のゲーム" : "Featured Games"}
             games={games}
             lang={lang}
+            nickname={nickname}
           />
           <ArcadeRow
             title={lang === "ja" ? "人気のゲーム" : "Popular Choices"}
             games={popularGames}
             lang={lang}
+            nickname={nickname}
           />
           <ArcadeRow
             title={lang === "ja" ? "すべてのゲーム (A-Z)" : "All Games (A-Z)"}
             games={alphabeticalGames}
             lang={lang}
+            nickname={nickname}
           />
         </main>
       </div>
