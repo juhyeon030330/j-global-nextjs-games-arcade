@@ -11,6 +11,7 @@ interface Player {
   nickname: string;
   house: string;
   score: number;
+  updated_at?: string;
 }
 
 const HOUSES = ["A", "B", "C", "D"];
@@ -39,7 +40,7 @@ export default function LeaderboardPage() {
     async function loadLeaderboard() {
       const { data } = await supabase
         .from("leaderboard")
-        .select("nickname, house, score");
+        .select("nickname, house, score, updated_at");
       if (data) {
         setPlayers(data);
         if (savedName) {
@@ -105,6 +106,14 @@ export default function LeaderboardPage() {
     1: "bg-amber-400 text-white",
     2: "bg-slate-300 text-slate-700",
     3: "bg-amber-700 text-white",
+  };
+
+  const formatUpdatedAt = (value?: string) => {
+    if (!value) return "-";
+    return new Date(value).toLocaleString(lang === "ja" ? "ja-JP" : "en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   };
 
   return (
@@ -249,6 +258,9 @@ export default function LeaderboardPage() {
                   <th className="py-2 px-2 font-bold text-right">
                     {lang === "ja" ? "ポイント" : "Points"}
                   </th>
+                  <th className="py-2 px-2 font-bold text-right">
+                    {lang === "ja" ? "最終更新" : "Last Updated"}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -284,6 +296,9 @@ export default function LeaderboardPage() {
                         <span className="text-[10px] text-slate-400 font-medium">
                           PTS
                         </span>
+                      </td>
+                      <td className="py-3 px-2 text-right text-xs text-slate-500">
+                        {formatUpdatedAt(p.updated_at)}
                       </td>
                     </tr>
                   );

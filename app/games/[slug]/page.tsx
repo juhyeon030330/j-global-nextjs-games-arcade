@@ -13,11 +13,13 @@ import {
   UserPlus,
   CornerDownRight,
   Plus,
+  Heart,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import Link from "next/link";
+import { isGameSaved, toggleSavedGame } from "@/lib/savedGames";
 
 const HOUSES = ["A", "B", "C", "D"];
 
@@ -438,13 +440,21 @@ export default function GameDetailPage({
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState("");
 
+  const [saved, setSaved] = useState(false);
+
   useEffect(() => {
     setNickname(localStorage.getItem("nickname") || "");
     const savedLang = localStorage.getItem("lang") as "ja" | "en";
     if (savedLang) setLang(savedLang);
+    setSaved(isGameSaved(slug));
 
     fetchGameAndComments();
   }, [slug]);
+
+  const handleToggleSave = () => {
+    const next = toggleSavedGame(slug);
+    setSaved(next.includes(slug));
+  };
 
   async function fetchGameAndComments() {
     // Fetch Game Details
@@ -607,15 +617,32 @@ export default function GameDetailPage({
                       {(lang === "ja" ? game.name_ja : game.name) || game.name}
                     </h1>
                   </div>
-                  <Link
-                    href={`/click/${slug}`}
-                    className="bg-[#1f497c] hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-transform hover:scale-105"
-                  >
-                    <Play className="w-5 h-5 fill-current" />
-                    <span>
-                      {lang === "ja" ? "ゲームをプレイ" : "Play Game"}
-                    </span>
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    {nickname && (
+                      <button
+                        onClick={handleToggleSave}
+                        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-colors cursor-pointer shrink-0"
+                        aria-label={saved ? "Unsave" : "Save"}
+                      >
+                        <Heart
+                          className={`w-5 h-5 transition-colors ${
+                            saved
+                              ? "fill-rose-500 text-rose-500"
+                              : "text-white"
+                          }`}
+                        />
+                      </button>
+                    )}
+                    <Link
+                      href={`/click/${slug}`}
+                      className="bg-[#1f497c] hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-2 shadow-lg transition-transform hover:scale-105"
+                    >
+                      <Play className="w-5 h-5 fill-current" />
+                      <span>
+                        {lang === "ja" ? "ゲームをプレイ" : "Play Game"}
+                      </span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
