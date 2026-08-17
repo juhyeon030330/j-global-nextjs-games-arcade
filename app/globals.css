@@ -55,11 +55,12 @@
   }
   100% {
     transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.2)
-      rotate(180deg);
+      rotate(240deg);
     opacity: 0;
   }
 }
 
 .animate-star-burst {
-  animation: starBurst 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* 2.2s duration gives a slow glide, cubic-bezier keeps full travel distance */
+  animation: starBurst 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
 }
