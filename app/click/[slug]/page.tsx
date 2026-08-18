@@ -55,6 +55,7 @@ export default function ClickGamePage({
   // 1. Initialize Game Session
   useEffect(() => {
     async function initGameSession() {
+      // Increment game clicks
       const { data: game } = await supabase
         .from("games")
         .select("*")
@@ -88,11 +89,18 @@ export default function ClickGamePage({
         }
 
         if (!lbUser) {
+          // If user doesn't exist, create them with 1 point for starting the game
           await supabase.from("leaderboard").insert({
             nickname,
-            score: 0,
+            score: 1,
             house: userHouse,
           });
+        } else {
+          // If user exists, increment their existing score by 1
+          await supabase
+            .from("leaderboard")
+            .update({ score: (lbUser.score || 0) + 1 })
+            .eq("nickname", nickname);
         }
       }
 
